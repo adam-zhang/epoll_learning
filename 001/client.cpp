@@ -27,7 +27,13 @@ int main(int,char**)
 	string s = "hello server";
 	write(client, s.c_str(), s.size() );
 	vector<char> buffer(512);
-	int n = read(client, &buffer[0], 512);
-	cout << &buffer[0] << endl;
+	while(true)
+	{
+		int n = recv(client, &buffer[0], 512, 0);
+		if (n <= 0 )
+			break;
+		string out(buffer.begin(), buffer.begin() + n);
+		cout << out << endl;
+	}
 	close(client);
 }
