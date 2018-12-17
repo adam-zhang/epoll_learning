@@ -33,22 +33,22 @@ void processClient(int fd)
 
 string readClient(int client)
 {
-	vector<char> buffer(512);
+	char buffer[512] = {0};
 	string out;
 	cout << "before read\n";
 	int n = 0;
-	if(n = read(client, &buffer[0], 512) != 0)
+	while(n = read(client, &buffer[0], 512) != 0)
 	{
 		cout << n << " byte is read.\n";
-		copy(buffer.begin(), buffer.begin() + n, back_inserter(out));
+		copy(buffer, buffer + n, back_inserter(out));
 	}
-	cout << "errno:" << errno << endl;
-	while(errno == EAGAIN)
-	{
-		cout << "EAGAIN\n";
-		n = read(client, &buffer[0], 512);
-		copy(buffer.begin(), buffer.begin() + n, back_inserter(out));
-	}
+	//cout << "errno:" << errno << endl;
+	//while(errno == EAGAIN)
+	//{
+	//	cout << "EAGAIN\n";
+	//	n = read(client, &buffer[0], 512);
+	//	copy(buffer.begin(), buffer.begin() + n, back_inserter(out));
+	//}
 	cout << "out size:" << out.size() << endl;
 	return out;
 }
@@ -95,26 +95,21 @@ int main(int,char**)
 				int client = accept(serverSocket, (sockaddr*)address.get(), &size );
 				if (client == -1)
 					error_process("accept failed.");
-				setnonblocking(client);
-				event.events = EPOLLIN|EPOLLET;
+				//setnonblocking(client);
+				event.events = EPOLLIN;
 				event.data.fd = client;
 				if (epoll_ctl(epoll, EPOLL_CTL_ADD, client, &event) == -1)
 					error_process("epoll_ctl process client failed.");
 
 			}
-			else
+			else if(events[i].events & EPOLLIN)
 			{
-				cout << "process client\n";
 				int client = events[i].data.fd;
-				cout << "process epollin." << endl;
-
-				string read = readClient(client);
-				cout << "read:" << read << endl;
-				string out = "welcome:" + read;
-				cout << out << endl;
-				write(client, out.c_str(), out.size());
+				//vector<char> buffer(512); // = {0};
+				//int n = read(client, &buffer[0], 512);
+				auto s = readClient(client);
+				cout << "data:" << s << endl; // << "size:" << n << endl;
 				epoll_ctl(epoll, EPOLL_CTL_DEL, client, NULL);
-
 			}
 		}
 

@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 2.8)
+project(epoll-002)
+set(server_sources server.cpp)
+add_executable(server ${server_sources})
+set(client_sources client.cpp)
+add_executable(client ${client_sources})
